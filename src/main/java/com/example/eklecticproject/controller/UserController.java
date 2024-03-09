@@ -16,8 +16,6 @@ import java.util.List;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/User")
-
-@PreAuthorize("hasAnyRole('ADMIN','USER')")
 @CrossOrigin(origins = "*")
 public class UserController {
     IserviceUser iserviceUser;
@@ -35,6 +33,7 @@ public class UserController {
 
     @PutMapping("/EditUser")
     public ResponseEntity EditUser(@RequestBody Utilisateur utilisateur) {
+
         ApplicationAuditAware a = new ApplicationAuditAware();
         if (a.getCurrentAuditor().get() == utilisateur.getId() || iserviceUser.GetUserById(a.getCurrentAuditor().get()).getRole().toString().equals("ADMIN")) {
             List<Token> tokens = tokenRepository.findAllTokenByUser(utilisateur.getId());
@@ -46,6 +45,7 @@ public class UserController {
         }
         return ResponseEntity.status(403).build();
     }
+
     @PreAuthorize("hasAuthority('admin:delete')")
     @DeleteMapping("/remove-user/{idU}")
     @ResponseBody

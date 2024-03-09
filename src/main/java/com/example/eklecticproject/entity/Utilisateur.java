@@ -2,6 +2,7 @@ package com.example.eklecticproject.entity;
 
 
 import com.example.eklecticproject.configuration.GrantedAuthorityDeserializer;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.persistence.*;
@@ -10,7 +11,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -30,11 +33,16 @@ public class Utilisateur implements UserDetails {
     private String Password;
     private Long Phonenumber;
     private String CodeVerification;
+    private Integer loyaltyPoints;
     @Enumerated(EnumType.STRING)
     private Role Role;
     private LocalDateTime DateEndCode;
+    @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
     private Set<Token> user_id;
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Abonnement> abonnements = new ArrayList<>();
     @JsonDeserialize(contentUsing = GrantedAuthorityDeserializer.class)
 
     @Override

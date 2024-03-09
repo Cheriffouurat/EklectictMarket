@@ -26,7 +26,7 @@ import static com.example.eklecticproject.entity.Role.USER;
 @EnableMethodSecurity
 public class SecurityConfiguration {
 
-    private static final String[] WHITE_LIST_URL = {"**"};
+    private static final String[] WHITE_LIST_URL = {"/**"};
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
     private final LogoutHandler logoutHandler;
@@ -38,8 +38,10 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(req ->
                         req.requestMatchers(WHITE_LIST_URL)
                                 .permitAll()
-                                .requestMatchers("/api/projects/**").hasAnyRole(ADMIN.name(),USER.name())
-                                .requestMatchers(GET, "/api/projects/**").hasAnyAuthority(ADMIN_READ.name(), MANAGER_READ.name())
+//                                .requestMatchers("/api/projects/**").hasAnyRole(ADMIN.name(),USER.name())
+//                                .requestMatchers(GET, "/api/projects/**").hasAnyAuthority(ADMIN_READ.name(), MANAGER_READ.name())
+ ////hadho ya fourat ba3d mye5dem kol chayy hano a3mel el has role kima t7ebb
+                                //par exemple ("/api/projects/**") n7eb yod5ol fiha ken admin donc .has role admin
                                 .anyRequest()
                                 .authenticated()
                 )
