@@ -19,7 +19,7 @@ public class ServicesLike {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     @JsonIgnore
-    Integer idServicesPost;
+    Integer idServicesLike;
     @Enumerated(EnumType.STRING)
     React react;
     @JsonIgnore

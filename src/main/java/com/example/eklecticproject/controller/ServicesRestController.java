@@ -42,7 +42,7 @@ public class ServicesRestController {
     }
 
     @DeleteMapping("/deleteService/{id}")
-    void deleteProduct(@PathVariable("id") Integer id) {
+    void deleteService(@PathVariable("id") Integer id) {
         iServiceService.removeService(id);
     }
 
