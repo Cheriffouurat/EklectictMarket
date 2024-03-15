@@ -12,6 +12,7 @@ import java.util.List;
 @RequestMapping("/Abonnement")
 public class AbonnementController {
     IAbonnementServices iAbonnementServices;
+
     @GetMapping("/allAbonnements")
     List<Abonnement> findAllAbonnements() {
         return iAbonnementServices.retrieveAllAbonnement();
@@ -35,5 +36,10 @@ public class AbonnementController {
     @DeleteMapping("/deleteAbonnement/{id}")
     void deleteAbonnement(@PathVariable("id") Integer id) {
         iAbonnementServices.removeAbonnement(id);
+    }
+    @GetMapping("/desactiverAbonnements")
+    public String desactiverAbonnements() {
+        iAbonnementServices.verifierEtDesactiverAbonnements();
+        return "Opération de désactivation des abonnements effectuée avec succès.";
     }
 }

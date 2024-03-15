@@ -25,6 +25,8 @@ public class Abonnement implements Serializable {
     private String nameAb;
     private LocalDate Datedebut;
     private LocalDate Datefin;
+    private  boolean isActive;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private Utilisateur user;

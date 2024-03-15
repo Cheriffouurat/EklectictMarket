@@ -17,4 +17,5 @@ public interface IAbonnementServices {
     void removeAbonnement(Integer idAbonnement);
 
     Abonnement updateAbonnement(Abonnement abonnement);
+    void verifierEtDesactiverAbonnements();
 }
