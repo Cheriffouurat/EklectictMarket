@@ -4,6 +4,7 @@ package com.example.eklecticproject.entity;
 import com.example.eklecticproject.configuration.GrantedAuthorityDeserializer;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.persistence.*;
 import lombok.*;
@@ -24,18 +25,26 @@ import java.util.Set;
 @Getter
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
+
 public class Utilisateur implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int Id;
+
     private String Username;
+
     private String email;
+
     private String Password;
+
     private Long Phonenumber;
+
     private String CodeVerification;
     private Integer loyaltyPoints;
+
     @Enumerated(EnumType.STRING)
     private Role Role;
+
     private LocalDateTime DateEndCode;
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")

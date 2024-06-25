@@ -29,5 +29,5 @@ public class ServicesLike {
     Utilisateur user;
     @JsonIgnore
     @ManyToOne
-    Services Services ;
+    ServicesType servicesType ;
 }

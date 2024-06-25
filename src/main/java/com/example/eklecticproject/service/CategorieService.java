@@ -16,9 +16,11 @@ import java.util.List;
 public class CategorieService implements ICategorieServices {
 
     ICategorieRepositorie CategorieRepositorie;
-
+    MailerService mailerService;
+    private static final String RECIPIENT_EMAIL = "fouratdon@gmail.com";
     @Override
     public Categorie addCategorie(Categorie categorie) {
+
         return CategorieRepositorie.save(categorie);
     }
     @Override
@@ -39,6 +41,8 @@ public class CategorieService implements ICategorieServices {
         return CategorieRepositorie.findById(idCategorie).orElse(null);
     }
 
+
+
     @Override
     public void removeCategorie(Integer idCategorie) {
         CategorieRepositorie.deleteById(idCategorie);
@@ -49,5 +53,6 @@ public class CategorieService implements ICategorieServices {
 
         return CategorieRepositorie.saveAndFlush(categorie);
     }
+
 }
 

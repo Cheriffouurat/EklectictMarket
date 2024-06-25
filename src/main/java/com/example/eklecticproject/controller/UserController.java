@@ -30,7 +30,10 @@ public class UserController {
     public Utilisateur GetUserById(@PathVariable("idU") Integer idU) {
         return iserviceUser.GetUserById(idU);
     }
-
+    @GetMapping("GetUsrByUsername/{Username}")
+    public Utilisateur GetUserByUsername(@PathVariable("Username") String Username) {
+        return iserviceUser.GetUserByUsername(Username);
+    }
     @PutMapping("/EditUser")
     public ResponseEntity EditUser(@RequestBody Utilisateur utilisateur) {
 
@@ -46,7 +49,7 @@ public class UserController {
         return ResponseEntity.status(403).build();
     }
 
-    @PreAuthorize("hasAuthority('admin:delete')")
+      @PreAuthorize("hasAuthority('admin:delete')")
     @DeleteMapping("/remove-user/{idU}")
     @ResponseBody
     public void removeUser(@PathVariable("idU") Integer idU) {

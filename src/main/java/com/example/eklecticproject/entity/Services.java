@@ -5,9 +5,9 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Getter
@@ -15,41 +15,31 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+
 public class Services implements Serializable {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Setter(value = AccessLevel.NONE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idService;
     private String nameService;
-    private Long priceParJour;
-    @OneToMany(mappedBy = "services", cascade = CascadeType.ALL)
-    private List<Abonnement> abonnements = new ArrayList<>();
-    @JsonIgnore
-    @ManyToOne
-    @JoinColumn(name = "Categorie_id")
-    private  Categorie Categorie;
-    private boolean loyaltyPoints;
-    private int ServiceLPointsParJour;
+    private String description;
 
-    @JsonIgnore
-    boolean archiver;
-    @JsonIgnore
+
+
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "services")
     Image image;
+
+
     @JsonIgnore
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "Services")
-    Set<ServicesLike> servicesLikes ;
+    @ManyToOne
+    @JoinColumn(name = "categorie_id")
+    private  Categorie categorie;
+    @JsonIgnore
+    @OneToMany(mappedBy = "service", cascade = CascadeType.ALL)
+    private List<ServicesType>  ServicesType = new ArrayList<>();
 
 
-
-
-
-
-
-
-    public boolean isLoyaltyPointsRedeemable() {
-        return loyaltyPoints;
-    }
 
 
 }
+
+

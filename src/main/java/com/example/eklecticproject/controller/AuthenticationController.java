@@ -14,10 +14,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-
+@CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequestMapping("/api/v1/auth")
-@CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 public class AuthenticationController {
 
@@ -26,6 +25,20 @@ public class AuthenticationController {
 
     @PostMapping("/register")
     public ResponseEntity register(@RequestBody Utilisateur request) {
+        String password = request.getPassword();
+        System.out.println("mot"+password);
+
+        // Assurez-vous que le mot de passe n'est pas null ou vide
+        if (password == null || password.isEmpty()) {
+            // Gérez le cas où le mot de passe est manquant ou vide
+            return ResponseEntity.badRequest().body("Le mot de passe est requis."+password);
+        }
+
+        // Traitement supplémentaire du mot de passe (hashage, validation, etc.)
+        // Ici, vous pouvez utiliser des outils de hachage sécurisés pour sécuriser le mot de passe
+
+        // Appelez le service pour enregistrer l'utilisateur
+        // Assurez-vous que le service.register retourne une ResponseEntity appropriée
         return ResponseEntity.ok(service.register(request)).getBody();
     }
     @PostMapping("/authenticate")
@@ -51,7 +64,7 @@ public class AuthenticationController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }}
-    @PostMapping("/resetPassword")
+        @PostMapping("/resetPassword")
     public ResponseEntity resetPassword(@RequestBody ResetPassword resetPassword) {
         return ResponseEntity.ok(new MessageResponse(iserviceUser.ResetPassword(resetPassword.getVerificationCode(),resetPassword.getNewPassword())));
     }

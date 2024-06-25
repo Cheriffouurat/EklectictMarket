@@ -12,4 +12,6 @@ public interface IserviceUser {
      String ResetPassword(String Code, String NewPassword);
      void EditUser(Utilisateur U);
      Utilisateur GetUserById(Integer id);
+
+    Utilisateur GetUserByUsername(String Username);
 }

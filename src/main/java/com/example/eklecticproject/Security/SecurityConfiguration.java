@@ -19,7 +19,6 @@ import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 import static com.example.eklecticproject.entity.Role.ADMIN;
 import static com.example.eklecticproject.entity.Role.USER;
-
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -36,14 +35,14 @@ public class SecurityConfiguration {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(req ->
-                        req.requestMatchers(WHITE_LIST_URL)
-                                .permitAll()
+                                req.requestMatchers(WHITE_LIST_URL)
+                                        .permitAll()
 //                                .requestMatchers("/api/projects/**").hasAnyRole(ADMIN.name(),USER.name())
 //                                .requestMatchers(GET, "/api/projects/**").hasAnyAuthority(ADMIN_READ.name(), MANAGER_READ.name())
- ////hadho ya fourat ba3d mye5dem kol chayy hano a3mel el has role kima t7ebb
-                                //par exemple ("/api/projects/**") n7eb yod5ol fiha ken admin donc .has role admin
-                                .anyRequest()
-                                .authenticated()
+                                        ////hadho ya fourat ba3d mye5dem kol chayy hano a3mel el has role kima t7ebb
+                                        //par exemple ("/api/projects/**") n7eb yod5ol fiha ken admin donc .has role admin
+                                        .anyRequest()
+                                        .authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
                 .authenticationProvider(authenticationProvider)

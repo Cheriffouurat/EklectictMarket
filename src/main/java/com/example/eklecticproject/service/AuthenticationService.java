@@ -4,6 +4,7 @@ package com.example.eklecticproject.service;
 import com.example.eklecticproject.Security.JwtService;
 import com.example.eklecticproject.auth.AuthenticationRequest;
 import com.example.eklecticproject.auth.AuthenticationResponse;
+import com.example.eklecticproject.entity.Role;
 import com.example.eklecticproject.entity.Token;
 import com.example.eklecticproject.entity.TokenType;
 import com.example.eklecticproject.entity.Utilisateur;
@@ -35,17 +36,19 @@ public class AuthenticationService {
             return ResponseEntity.ok("nom existe deja");
         }else if(repository.GetUserByEmail(request.getEmail())!=null){
             return ResponseEntity.ok("email existe deja");
-        }else
+        }else {
 
             request.setPassword(this.passwordEncoder.encode(request.getPassword()));
-        repository.save(request);
-        var jwtToken = jwtService.generateToken(request);
-        var refreshToken = jwtService.generateRefreshToken(request);
-        saveUserToken(request, jwtToken);
-        return ResponseEntity.ok(AuthenticationResponse.builder()
-                .accessToken(jwtToken)
-                .refreshToken(refreshToken)
-                .build());
+            request.setRole(Role.USER);
+            repository.save(request);
+            var jwtToken = jwtService.generateToken(request);
+            var refreshToken = jwtService.generateRefreshToken(request);
+            saveUserToken(request, jwtToken);
+            return ResponseEntity.ok(AuthenticationResponse.builder()
+                    .accessToken(jwtToken)
+                    .refreshToken(refreshToken)
+                    .build());
+        }
     }
 
     public ResponseEntity authenticate(AuthenticationRequest request) {

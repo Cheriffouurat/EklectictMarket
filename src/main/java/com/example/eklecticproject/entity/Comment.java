@@ -17,7 +17,6 @@ import java.util.Set;
 public class Comment {
     @Id
     @JsonIgnore
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
     Integer idComment;
     String text;
     @JsonIgnore
@@ -25,9 +24,9 @@ public class Comment {
     @JsonIgnore
     @ManyToOne
     Utilisateur user;
-    @JsonIgnore
-    @ManyToOne
-    Services Services;
+//    @JsonIgnore
+//    @ManyToOne
+//    aaaa Services;
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "comment")
     Set<CommentLike> commentLikes;

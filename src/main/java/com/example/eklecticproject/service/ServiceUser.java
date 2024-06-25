@@ -24,20 +24,22 @@ public class ServiceUser implements IserviceUser {
     public List<Utilisateur> GetALLUser() {
         return userRepository.findAll();
     }
+
     @Override
     public void DeleteUser(Integer IdUser) {
-    userRepository.deleteById(IdUser);
+        userRepository.deleteById(IdUser);
     }
+
     @Override
     public String SendCode(String Email) {
-        if(userRepository.GetUserByEmail(Email)==null){
+        if (userRepository.GetUserByEmail(Email) == null) {
             return "Email n'existe pas";
-        }else{
+        } else {
             String code = randomString.randomGeneratedString(8);
-            Utilisateur u =userRepository.GetUserByEmail(Email);
+            Utilisateur u = userRepository.GetUserByEmail(Email);
             u.setCodeVerification(code);
             u.setDateEndCode(LocalDateTime.now().plusMinutes(5));
-            mailerService.sendEmail(u.getEmail(),"REST CODE","votre code de verification est :"+code+"\nNB:Le code ne fonctionne pas apres 5 minutes");
+            mailerService.sendEmail(u.getEmail(), "REST CODE", "votre code de verification est :" + code + "\nNB:Le code ne fonctionne pas apres 5 minutes");
             userRepository.save(u);
             return "ok";
         }
@@ -46,28 +48,29 @@ public class ServiceUser implements IserviceUser {
     @Override
     public String ResetPassword(String Code, String NewPassword) {
         Utilisateur u = userRepository.GetUserByCode(Code);
-        if (u == null ){
+        if (u == null) {
             return "code est incorrect";
-        }
-        else if(u.getDateEndCode().isBefore(LocalDateTime.now())) {
+        } else if (u.getDateEndCode().isBefore(LocalDateTime.now())) {
             return "date expirer";
+        } else {
+            u.setPassword(passwordEncoder.encode(NewPassword));
+            u.setCodeVerification(null);
+            u.setDateEndCode(null);
+            userRepository.save(u);
         }
-        else{
-                u.setPassword(passwordEncoder.encode(NewPassword));
-                u.setCodeVerification(null);
-                u.setDateEndCode(null);
-                userRepository.save(u);
-            }
         return "OK";
     }
+
     @Override
     public void EditUser(Utilisateur utilisateur) {
-        Utilisateur u=userRepository.getById(utilisateur.getId());
-        if(!u.getPassword().equals(utilisateur.getPassword())){
+        Utilisateur u = userRepository.getById(utilisateur.getId());
+        if (!u.getPassword().equals(utilisateur.getPassword())) {
             System.out.println("je suis la");
             utilisateur.setPassword(this.passwordEncoder.encode(utilisateur.getPassword()));
         }
+        // mailerService.sendEmail(utilisateur.getEmail(),"modfifier avec succes","Votre compte a été modifié avec succès.");
         userRepository.save(utilisateur);
+
 
     }
 
@@ -75,4 +78,10 @@ public class ServiceUser implements IserviceUser {
     public Utilisateur GetUserById(Integer id) {
         return userRepository.findById(id).orElse(null);
     }
+
+    @Override
+    public Utilisateur GetUserByUsername(String Username) {
+        return userRepository.findByUsername(Username).orElse(null);
+    }
+
 }

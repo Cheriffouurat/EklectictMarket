@@ -1,7 +1,7 @@
 package com.example.eklecticproject.service;
 
 
-import com.example.eklecticproject.entity.Services;
+import com.example.eklecticproject.entity.ServicesType;
 import com.example.eklecticproject.entity.Utilisateur;
 import com.example.eklecticproject.enumerations.React;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -31,5 +31,5 @@ public class ServLike {
     Utilisateur user;
     @JsonIgnore
     @ManyToOne
-    Services Services ;
+    ServicesType ServicesType ;
 }

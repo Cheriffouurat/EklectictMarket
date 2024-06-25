@@ -2,19 +2,15 @@ package com.example.eklecticproject.service;
 
 
 import com.example.eklecticproject.Iservice.IAbonnementServices;
-import com.example.eklecticproject.Iservice.IserviceUser;
+import com.example.eklecticproject.Iservice.IServiceType;
 import com.example.eklecticproject.entity.Abonnement;
+import com.example.eklecticproject.entity.ServicesType;
 import com.example.eklecticproject.repository.IAbonnementRepositorie;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Slf4j
@@ -22,17 +18,17 @@ import java.util.List;
 @AllArgsConstructor
 public class AbonnementService implements IAbonnementServices {
      IAbonnementRepositorie AbonnementRepositorie;
-
+     IServiceType iServiceType;
    //  IUserServices userServices;
 
     @Override
     public Abonnement addAbonnement(Abonnement abonnement) {
         return AbonnementRepositorie.save(abonnement);
     }
-    @Override
-    public Abonnement getbyname(String name) {
-        return AbonnementRepositorie.findAbonnementByNameAb(name);
-    }
+//    @Override
+//    public Abonnement getbyname(String name) {
+//        return AbonnementRepositorie.findAbonnementByNameAb(name);
+//    }
 
     @Override
     public List<Abonnement> retrieveAllAbonnement() {
@@ -57,20 +53,20 @@ public class AbonnementService implements IAbonnementServices {
 
        return AbonnementRepositorie.saveAndFlush(abonnement);
     }
-    @Override
-    @Scheduled(fixedRate = 5000)
-    public void verifierEtDesactiverAbonnements() {
-        List<Abonnement> abonnements = AbonnementRepositorie.findAll();
-        LocalDate currentDate = LocalDate.now();
-
-        for (Abonnement abonnement : abonnements) {
-            if (currentDate.isAfter(abonnement.getDatefin())) {
-                abonnement.setActive(false);
-                AbonnementRepositorie.save(abonnement);
-                System.out.println("L'abonnement expiré a été désactivé.");
-            }
-        }
-    }
+//    @Override
+//    @Scheduled(fixedRate = 5000)
+//    public void verifierEtDesactiverAbonnements() {
+//        List<Abonnement> abonnements = AbonnementRepositorie.findAll();
+//        LocalDate currentDate = LocalDate.now();
+//
+//        for (Abonnement abonnement : abonnements) {
+//            if (currentDate.isAfter(abonnement.getDatefin())) {
+//                abonnement.setActive(false);
+//                AbonnementRepositorie.save(abonnement);
+//                System.out.println("L'abonnement expiré a été désactivé.");
+//            }
+//        }
+//    }
 
 
 
@@ -108,6 +104,20 @@ public class AbonnementService implements IAbonnementServices {
     public void saveAbonnement(Abonnement abonnement) {
         AbonnementRepositorie.save(abonnement);
     }*/
+   @Override
+
+   public Abonnement setServiceTypeIdInAbonnement(Abonnement abonnement, int idServiceType) {
+       if (idServiceType <= 0) {
+           throw new IllegalArgumentException("idServiceType doit être positif");
+       }
+       ServicesType servicesType = iServiceType.retrieveServicesType(idServiceType);
+       if (servicesType == null) {
+           throw new IllegalArgumentException("le ServiceType avec l'ID " + idServiceType + " n'existe pas");
+       }
+       abonnement.setServicesType(servicesType);
+       return AbonnementRepositorie.save(abonnement);
+   }
+
 
 
 }

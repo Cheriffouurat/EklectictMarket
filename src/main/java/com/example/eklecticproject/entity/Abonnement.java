@@ -1,5 +1,6 @@
 package com.example.eklecticproject.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,24 +19,22 @@ import java.util.List;
 public class Abonnement implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Setter(value = AccessLevel.NONE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
 
     private Integer idAbonnement;
-    private String nameAb;
     private LocalDate Datedebut;
     private LocalDate Datefin;
+    private float prix;
     private  boolean isActive;
-
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "user_id")
     private Utilisateur user;
+    @JsonIgnore
     @ManyToOne
-    @JoinColumn(name = "Service_id")
-    private  Services services;
-    @OneToMany(mappedBy = "abonnement", cascade = CascadeType.ALL)
-    private List<Offre> offres = new ArrayList<>();
-
+    @JoinColumn(name = "servicesType_id")
+    private ServicesType servicesType;
 
 
 }

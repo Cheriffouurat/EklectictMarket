@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 
+
 @Configuration
 public class SwaggerConfig {
 
@@ -17,6 +18,7 @@ public class SwaggerConfig {
                 .info(infoAPI());
 
     }
+
 
     public Info infoAPI() {
         return new Info().title(" EPROJECT ")

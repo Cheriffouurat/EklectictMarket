@@ -1,7 +1,10 @@
 package com.example.eklecticproject.controller;
 
 import com.example.eklecticproject.Iservice.IAbonnementServices;
+import com.example.eklecticproject.Iservice.IServiceType;
 import com.example.eklecticproject.entity.Abonnement;
+import com.example.eklecticproject.entity.Services;
+import com.example.eklecticproject.entity.ServicesType;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,6 +15,7 @@ import java.util.List;
 @RequestMapping("/Abonnement")
 public class AbonnementController {
     IAbonnementServices iAbonnementServices;
+
 
     @GetMapping("/allAbonnements")
     List<Abonnement> findAllAbonnements() {
@@ -37,9 +41,15 @@ public class AbonnementController {
     void deleteAbonnement(@PathVariable("id") Integer id) {
         iAbonnementServices.removeAbonnement(id);
     }
-    @GetMapping("/desactiverAbonnements")
-    public String desactiverAbonnements() {
-        iAbonnementServices.verifierEtDesactiverAbonnements();
-        return "Opération de désactivation des abonnements effectuée avec succès.";
+//    @GetMapping("/desactiverAbonnements")
+//    public String desactiverAbonnements() {
+//        iAbonnementServices.verifierEtDesactiverAbonnements();
+//        return "Opération de désactivation des abonnements effectuée avec succès.";
+//    }
+    @PutMapping("/addAndassignServicetypeToAbonnement/{idServicetype}")
+    Abonnement addAndassigncategorieToService(@RequestBody Abonnement A, @PathVariable("idServicetype") Integer idServicetype){
+
+        return iAbonnementServices.setServiceTypeIdInAbonnement(A,idServicetype);
     }
+
 }
