@@ -1,7 +1,12 @@
 package com.example.eklecticproject.Iservice;
 
-public interface ISmartPayService {
-    void sendSMS(String subscriptionId, String message);
+import org.springframework.http.ResponseEntity;
 
-    String getAccessToken();
+public interface ISmartPayService {
+
+
+
+    String getAccessToken(String clientId, String clientSecret, String authorizationCode);
+
+
 }

@@ -1,85 +1,84 @@
 package com.example.eklecticproject.service;
 
-import com.example.eklecticproject.configuration.RestTemplateConfig;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
+import com.example.eklecticproject.Iservice.ISmartPayService;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
-import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @Service
-public class SmartPayService {
+public class SmartPayService implements ISmartPayService {
     private final RestTemplate restTemplate;
 
-    @Value("${spring.security.oauth2.client.registration.eklecticapi.client-id}")
+    @Value("${spring.security.oauth2.client.registration.my-client.client-id}")
     private String clientId;
 
-    @Value("${spring.security.oauth2.client.registration.eklecticapi.client-secret}")
+    @Value("${spring.security.oauth2.client.registration.my-client.client-secret}")
     private String clientSecret;
 
-//    @Value("${spring.security.oauth2.client.provider.eklecticapi.token-uri}")
-private final ClientRegistrationRepository clientRegistrationRepository;
+    @Value("${spring.security.oauth2.client.registration.my-client.redirect-uri}")
+    private String redirectUri;
 
-    public String getAccessToken(String authorizationCode) {
-        ClientRegistration clientRegistration = clientRegistrationRepository.findByRegistrationId("eklecticapi-provider");
+    private final ClientRegistrationRepository clientRegistrationRepository;
+    @Override
+    public String getAccessToken(String clientId, String clientSecret, String authorizationCode) {
+        String oauthTokenUrl = "https://payment.eklectic.tn/API/oauth/token";
 
+        // Construire les paramètres de la requête
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(oauthTokenUrl)
+                .queryParam("grant_type", "authorization_code")
+                .queryParam("client_id", clientId)
+                .queryParam("client_secret", clientSecret)
+                .queryParam("code", authorizationCode);
+
+        // Configurer les en-têtes HTTP
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        headers.setContentType(MediaType.APPLICATION_JSON);
 
-        String body = "grant_type=authorization_code" +
-                "&client_id=" + clientRegistration.getClientId() +
-                "&client_secret=" + clientRegistration.getClientSecret() +
-                "&redirect_uri=" + clientRegistration.getRedirectUri() +
-                "&code=" + authorizationCode; // Replace "authorizationCode" with the actual authorization code
+        // Configurer la requête HTTP
+        HttpEntity<String> entity = new HttpEntity<>(headers);
 
-        HttpEntity<String> requestEntity = new HttpEntity<>(body, headers);
-
+        // Faire la requête et récupérer la réponse
         ResponseEntity<String> response = restTemplate.exchange(
-                clientRegistration.getProviderDetails().getTokenUri(),
+                builder.toUriString(),
                 HttpMethod.POST,
-                requestEntity,
-                String.class
-        );
+                entity,
+                String.class);
 
-        if (response.getStatusCode().is2xxSuccessful()) {
-            JSONObject jsonObject = new JSONObject(response.getBody());
-            return jsonObject.getString("access_token");
+        // Vérifier si la requête a réussi
+        if (response.getStatusCode() == HttpStatus.OK) {
+            // Extraire l'access token de la réponse
+            String responseBody = response.getBody();
+
+             JSONObject jsonObject = new JSONObject(responseBody);
+             String accessToken = jsonObject.getString("access_token");
+
+            return responseBody; // Retourne la réponse brute pour l'exemple
         } else {
-            throw new RuntimeException("Failed to obtain access token");
+            // Gérer les erreurs ici, par exemple, loguer l'erreur
+            throw new RuntimeException("Failed to retrieve access token: " + response.getStatusCode());
         }
     }
 
-    public ResponseEntity<String> callSecureApi(String url, String authorizationCode) {
-        String accessToken = getAccessToken(authorizationCode);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(accessToken);
-        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 
-        HttpEntity<String> requestEntity = new HttpEntity<>(headers);
 
-        try {
-            return restTemplate.exchange(
-                    url,
-                    HttpMethod.GET,
-                    requestEntity,
-                    String.class
-            );
-        } catch (RestClientException e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error calling secure API: " + e.getMessage());
-        }
-    }
+
+
+
 }
+
+
 
 
