@@ -36,18 +36,18 @@ public class OAuth2ConfigSecurity {
         return new HttpSessionOAuth2AuthorizationRequestRepository();
     }
 
-    @Bean
-    SecurityFilterChain oauthsecurityFilterChain(HttpSecurity http) throws Exception {
-        return http
-                .authorizeHttpRequests(auth -> {
-                    auth.requestMatchers("/").permitAll();
-                    auth.requestMatchers("/favicon.ico","/SmartPay/secured").permitAll();
-                    auth.anyRequest().authenticated();
-                })
-                .oauth2Login(withDefaults())
-                .formLogin(withDefaults())
-                .build();
-    }
+//    @Bean
+//    SecurityFilterChain oauthsecurityFilterChain(HttpSecurity http) throws Exception {
+//        return http
+//                .authorizeHttpRequests(auth -> {
+//                    auth.requestMatchers("/").permitAll();
+//                    auth.requestMatchers("/favicon.ico","/SmartPay/secured").permitAll();
+//                    auth.anyRequest().authenticated();
+//                })
+//                .oauth2Login(withDefaults())
+//                .formLogin(withDefaults())
+//                .build();
+//    }
     @Bean
     public ClientRegistrationRepository clientRegistrationRepository() {
         ClientRegistration clientRegistration = ClientRegistration.withRegistrationId("my-client")
