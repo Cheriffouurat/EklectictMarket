@@ -178,6 +178,54 @@ public class ImageService implements IimageSer {
         // Retourner une réponse indiquant que l'opération s'est terminée avec succès
         return ResponseEntity.ok().build();
     }
+    @Override
+    public ResponseEntity<?> AjouterModifierImage(MultipartFile image, Integer id) throws IOException {
+        ServicesType service = serviceTypeRepositorie.findById(id).orElse(null);
+
+        // Vérifier si une image est fournie
+        if (image == null || image.isEmpty()) {
+            return ResponseEntity.badRequest().body("Please provide an image.");
+        }
+
+        // Vérifier si le service a déjà une image
+        Image existingImage = service.getImage();
+
+        // Si le service a déjà une image, mettre à jour les détails de l'image existante
+        if (existingImage != null) {
+            // Supprimer l'ancienne image de Cloudinary
+            cloudinaryService.delete(existingImage.getImagenId());
+
+            // Uploader la nouvelle image sur Cloudinary
+            Map<String, String> result = cloudinaryService.upload(image);
+
+            // Mettre à jour les détails de l'image existante
+            existingImage.setName(result.get("original_filename"));
+            existingImage.setImagenUrl(result.get("url"));
+            existingImage.setImagenId(result.get("public_id"));
+
+            // Enregistrer les modifications dans la base de données
+            imageRepo.save(existingImage);
+        } else {
+            // Si le service n'a pas encore d'image, créer une nouvelle image
+            Map<String, String> result = cloudinaryService.upload(image);
+
+            // Créer un nouvel objet Image avec les détails de l'image uploadée
+            Image newImage = new Image(
+                    result.get("original_filename"),
+                    result.get("url"),
+                    result.get("public_id")
+            );
+
+            // Associer la nouvelle image avec le service
+            newImage.setServicesType(service);
+
+            // Enregistrer l'image dans la base de données
+            imageRepo.save(newImage);
+        }
+
+        // Retourner une réponse indiquant que l'opération s'est terminée avec succès
+        return ResponseEntity.ok().build();
+    }
 //    @Override
 //    public ResponseEntity<?> addAndAssignImageToNewCategory(Categorie categorie, MultipartFile image) throws IOException {
 //        // Vérifiez si la catégorie est nulle

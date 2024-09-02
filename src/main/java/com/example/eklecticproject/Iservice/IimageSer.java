@@ -27,6 +27,8 @@ public interface IimageSer extends Serializable {
 
     ResponseEntity<?> addAndAssignServicetest(MultipartFile image, Integer id) throws IOException;
 
+    ResponseEntity<?> AjouterModifierImage(MultipartFile image, Integer id) throws IOException;
+
     void delete(int id);
     boolean exists(int id);
 

@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,11 +23,16 @@ public class Abonnement implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 
 
-    private Integer idAbonnement;
-    private LocalDate Datedebut;
-    private LocalDate Datefin;
-    private float prix;
-    private  boolean isActive;
+    private Integer id;
+    private String idAbonnement;
+    private String tel;
+    private LocalDateTime dateDebFree;
+    private LocalDateTime dateFinFree;
+    private LocalDateTime dateAbonnement;
+    private LocalDateTime dateDesabonnement;
+    private String idService;
+    private String type;
+    private LocalDateTime dateExpiration;
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "user_id")

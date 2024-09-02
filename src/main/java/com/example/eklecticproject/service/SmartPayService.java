@@ -1,83 +1,120 @@
 package com.example.eklecticproject.service;
 
 import com.example.eklecticproject.Iservice.ISmartPayService;
+import com.example.eklecticproject.Security.TokenResponse;
+import com.example.eklecticproject.entity.Abonnement;
+import com.example.eklecticproject.repository.IAbonnementRepositorie;
+import com.example.eklecticproject.repository.IServiceRepositorie;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import org.json.JSONObject;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClientException;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class SmartPayService implements ISmartPayService {
     private final RestTemplate restTemplate;
+   private final IAbonnementRepositorie AbonnementRepositorie;
 
-    @Value("${spring.security.oauth2.client.registration.my-client.client-id}")
+    @Value("${client-id}")
     private String clientId;
 
-    @Value("${spring.security.oauth2.client.registration.my-client.client-secret}")
+    @Value("${client-secret}")
     private String clientSecret;
 
-    @Value("${spring.security.oauth2.client.registration.my-client.redirect-uri}")
-    private String redirectUri;
 
-    private final ClientRegistrationRepository clientRegistrationRepository;
     @Override
-    public String getAccessToken(String clientId, String clientSecret, String authorizationCode) {
-        String oauthTokenUrl = "https://payment.eklectic.tn/API/oauth/token";
+    public String getAccessToken(String authorizationCode) {
+        String tokenUrl = "https://payment.eklectic.tn/API/oauth/token";
 
-        // Construire les paramètres de la requête
-        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(oauthTokenUrl)
-                .queryParam("grant_type", "authorization_code")
-                .queryParam("client_id", clientId)
-                .queryParam("client_secret", clientSecret)
-                .queryParam("code", authorizationCode);
+        // Préparer le corps de la requête
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("grant_type", "authorization_code");
+        body.add("client_id", clientId);
+        body.add("client_secret", clientSecret);
+        body.add("code", authorizationCode);
 
-        // Configurer les en-têtes HTTP
+        // Préparer les en-têtes HTTP
         HttpHeaders headers = new HttpHeaders();
-        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setContentType(org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED);
 
-        // Configurer la requête HTTP
-        HttpEntity<String> entity = new HttpEntity<>(headers);
+        // Créer l'entité HTTP avec le corps et les en-têtes
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
 
-        // Faire la requête et récupérer la réponse
-        ResponseEntity<String> response = restTemplate.exchange(
-                builder.toUriString(),
+        // Envoyer la requête POST
+        ResponseEntity<TokenResponse> response = restTemplate.exchange(
+                tokenUrl,
                 HttpMethod.POST,
-                entity,
-                String.class);
+                request,
+                TokenResponse.class
+        );
 
-        // Vérifier si la requête a réussi
-        if (response.getStatusCode() == HttpStatus.OK) {
-            // Extraire l'access token de la réponse
-            String responseBody = response.getBody();
-
-             JSONObject jsonObject = new JSONObject(responseBody);
-             String accessToken = jsonObject.getString("access_token");
-
-            return responseBody; // Retourne la réponse brute pour l'exemple
+        if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+            return response.getBody().getAccessToken();
         } else {
-            // Gérer les erreurs ici, par exemple, loguer l'erreur
-            throw new RuntimeException("Failed to retrieve access token: " + response.getStatusCode());
+            throw new RuntimeException("Failed to obtain access token");
         }
     }
+    @Override
+    public Abonnement  getUserInfo(String apiToken) {
+        String url = "https://payment.eklectic.tn/API/oauth/user/info";
 
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + apiToken);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
 
+        ResponseEntity<String> response = restTemplate.exchange(
+                url,
+                HttpMethod.POST,
+                entity,
+                String.class
+        );
 
+        String responseBody = response.getBody();
+        return mapToAbonnement(responseBody);
+    }
 
+    private Abonnement mapToAbonnement(String responseBody) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode root = objectMapper.readTree(responseBody);
 
+            Abonnement abonnement = new Abonnement();
+            abonnement.setIdAbonnement(root.path("id").asText());
+            abonnement.setTel(root.path("msisdn").asText());
+            abonnement.setDateDebFree(LocalDateTime.parse(root.path("date_debfree").asText(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+            abonnement.setDateFinFree(LocalDateTime.parse(root.path("date_finfree").asText(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+            abonnement.setDateAbonnement(LocalDateTime.parse(root.path("subscription_date").asText(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+            abonnement.setDateDesabonnement(root.path("unsubscription_date").isNull() ? null : LocalDateTime.parse(root.path("unsubscription_date").asText(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+            abonnement.setIdService(root.path("service_id").asText());
+            abonnement.setType(root.path("type").asText());
+            abonnement.setDateExpiration(LocalDateTime.parse(root.path("expire_date").asText(), DateTimeFormatter.ISO_OFFSET_DATE_TIME));
 
-
+            return  AbonnementRepositorie.save(abonnement);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }
+
+
+
+
+
+
+
 
 
 

@@ -29,7 +29,9 @@ import java.util.List;
 
         private String nom;
 
+        private String description;
 
+        private String gateway;
 
         private float prix;
 

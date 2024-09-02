@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+
 @Service
 @AllArgsConstructor
 public class ServiceUser implements IserviceUser {
@@ -82,6 +84,10 @@ public class ServiceUser implements IserviceUser {
     @Override
     public Utilisateur GetUserByUsername(String Username) {
         return userRepository.findByUsername(Username).orElse(null);
+    }
+    @Override
+    public Optional<Utilisateur> GetUserByPhoneNumber(String phoneNumber) {
+        return userRepository.findByPhonenumber(phoneNumber);
     }
 
 }

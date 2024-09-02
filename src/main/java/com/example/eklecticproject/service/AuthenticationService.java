@@ -13,17 +13,22 @@ import com.example.eklecticproject.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+
 public class AuthenticationService {
     private final UserRepository repository;
     private final TokenRepository tokenRepository;
@@ -33,9 +38,9 @@ public class AuthenticationService {
 
     public ResponseEntity register(Utilisateur request) {
         if(repository.GetUserByUsername(request.getUsername())!=null){
-            return ResponseEntity.ok("nom existe deja");
+             return ResponseEntity.status(HttpStatus.CONFLICT).body("Le nom d'utilisateur existe déjà.");
         }else if(repository.GetUserByEmail(request.getEmail())!=null){
-            return ResponseEntity.ok("email existe deja");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("L'adresse e-mail est déjà utilisée.");
         }else {
 
             request.setPassword(this.passwordEncoder.encode(request.getPassword()));
@@ -44,6 +49,74 @@ public class AuthenticationService {
             var jwtToken = jwtService.generateToken(request);
             var refreshToken = jwtService.generateRefreshToken(request);
             saveUserToken(request, jwtToken);
+            return ResponseEntity.ok(AuthenticationResponse.builder()
+                    .accessToken(jwtToken)
+                    .refreshToken(refreshToken)
+                    .build());
+        }
+    }
+    public ResponseEntity register1(Utilisateur request) {
+        if(repository.GetUserByUsername(request.getUsername())!=null){
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Le nom d'utilisateur existe déjà.");
+        }else if(repository.GetUserByEmail(request.getEmail())!=null){
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("L'adresse e-mail est déjà utilisée.");
+        }else {
+
+            request.setPassword(this.passwordEncoder.encode(request.getPassword()));
+            repository.save(request);
+            var jwtToken = jwtService.generateToken(request);
+            var refreshToken = jwtService.generateRefreshToken(request);
+            saveUserToken(request, jwtToken);
+            return ResponseEntity.ok(AuthenticationResponse.builder()
+                    .accessToken(jwtToken)
+                    .refreshToken(refreshToken)
+                    .build());
+        }
+    }
+    public ResponseEntity registerAdmin(Utilisateur request) {
+        if(repository.GetUserByUsername(request.getUsername())!=null){
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Le nom d'utilisateur existe déjà.");
+        }else if(repository.GetUserByEmail(request.getEmail())!=null){
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("L'adresse e-mail est déjà utilisée.");
+        }else {
+
+            request.setPassword(this.passwordEncoder.encode(request.getPassword()));
+            repository.save(request);
+            var jwtToken = jwtService.generateToken(request);
+            var refreshToken = jwtService.generateRefreshToken(request);
+            saveUserToken(request, jwtToken);
+            return ResponseEntity.ok(AuthenticationResponse.builder()
+                    .accessToken(jwtToken)
+                    .refreshToken(refreshToken)
+                    .build());
+        }
+    }
+
+
+    public ResponseEntity<?> telRegistration( String phonenumber) {
+        Optional<Utilisateur> existingUser = repository.findByPhonenumber(phonenumber);
+
+        if (existingUser.isPresent()) {
+            Utilisateur user = existingUser.get();
+            System.out.println("Utilisateur trouvé : " + user);
+
+            return ResponseEntity.ok("Numéro existe déjà. Utilisateur : " + user);
+        } else {
+            Utilisateur newUser = new Utilisateur();
+            newUser.setPhonenumber(phonenumber);
+            newUser.setPassword(this.passwordEncoder.encode(UUID.randomUUID().toString()));
+            newUser.setEmail(UUID.randomUUID().toString());
+            String prefix = "user";
+            String uniqueString = prefix + UUID.randomUUID().toString();
+            newUser.setUsername(uniqueString);
+            newUser.setRole(Role.USER);
+
+            repository.save(newUser);
+
+            var jwtToken = jwtService.generateToken(newUser);
+            var refreshToken = jwtService.generateRefreshToken(newUser);
+            saveUserToken(newUser, jwtToken);
+
             return ResponseEntity.ok(AuthenticationResponse.builder()
                     .accessToken(jwtToken)
                     .refreshToken(refreshToken)

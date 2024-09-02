@@ -2,18 +2,32 @@ package com.example.eklecticproject.controller;
 
 
 import com.example.eklecticproject.Iservice.IserviceUser;
+import com.example.eklecticproject.Security.LogoutService;
 import com.example.eklecticproject.auth.AuthenticationRequest;
 import com.example.eklecticproject.configuration.MessageResponse;
 import com.example.eklecticproject.entity.ResetPassword;
 import com.example.eklecticproject.entity.Utilisateur;
+import com.example.eklecticproject.repository.UserRepository;
 import com.example.eklecticproject.service.AuthenticationService;
+import com.example.eklecticproject.service.ServiceUser;
+import com.nimbusds.oauth2.sdk.TokenResponse;
+import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
+import java.util.Optional;
+import java.util.UUID;
+
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -22,24 +36,54 @@ public class AuthenticationController {
 
     private final AuthenticationService service;
     private final IserviceUser iserviceUser;
+    private final UserRepository userRepository;
+    private HttpServletRequest request;
+
+    private HttpServletResponse response;
+
+
+    private final LogoutService logoutService;
+
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(@RequestHeader("Authorization") String authHeader,
+                                         HttpServletRequest request, HttpServletResponse response) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        logoutService.logout(request, response, authentication);
+        return ResponseEntity.ok("Logout successful");
+    }
 
     @PostMapping("/register")
     public ResponseEntity register(@RequestBody Utilisateur request) {
         String password = request.getPassword();
         System.out.println("mot"+password);
 
-        // Assurez-vous que le mot de passe n'est pas null ou vide
         if (password == null || password.isEmpty()) {
-            // Gérez le cas où le mot de passe est manquant ou vide
+
             return ResponseEntity.badRequest().body("Le mot de passe est requis."+password);
         }
 
-        // Traitement supplémentaire du mot de passe (hashage, validation, etc.)
-        // Ici, vous pouvez utiliser des outils de hachage sécurisés pour sécuriser le mot de passe
 
-        // Appelez le service pour enregistrer l'utilisateur
-        // Assurez-vous que le service.register retourne une ResponseEntity appropriée
         return ResponseEntity.ok(service.register(request)).getBody();
+    }
+    @PostMapping("/register1")
+    public ResponseEntity register1(@RequestBody Utilisateur request) {
+        String password = request.getPassword();
+        System.out.println("mot"+password);
+
+        if (password == null || password.isEmpty()) {
+
+            return ResponseEntity.badRequest().body("Le mot de passe est requis."+password);
+        }
+
+
+        return ResponseEntity.ok(service.register1(request)).getBody();
+    }
+
+
+    @GetMapping("/Oauth2Registration/{phonenumber}")
+    public ResponseEntity Oauth2Registration(@PathVariable("phonenumber") String phonenumber) {
+
+        return service.telRegistration(phonenumber);
     }
     @PostMapping("/authenticate")
     public ResponseEntity authenticate(@RequestBody AuthenticationRequest request) {
@@ -70,4 +114,6 @@ public class AuthenticationController {
     }
 
 
-}
+
+
+   }

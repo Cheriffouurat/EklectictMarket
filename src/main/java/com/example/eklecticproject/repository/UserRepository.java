@@ -12,6 +12,9 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<Utilisateur, Integer> {
     @Query("select u from Utilisateur u where u.email like :email")
     Optional<Utilisateur> findByEmail(@Param("email") String email);
+    Optional<Utilisateur> findByPhonenumber(String phonenumber);
+
+
 
     @Query("select u from Utilisateur u where u.Username like :email")
     Optional<Utilisateur> findByUsername(@Param("email") String email);
@@ -22,4 +25,6 @@ public interface UserRepository extends JpaRepository<Utilisateur, Integer> {
     Utilisateur GetUserByEmail(@Param("email") String email);
     @Query("select u from Utilisateur u where u.CodeVerification like :code order by u.CodeVerification desc limit 1")
     Utilisateur GetUserByCode(@Param("code") String email);
+//    @Query("select u from Utilisateur u where u.Phonenumber like :numeroDeTel")
+//    Optional<Utilisateur> findByPhonenumber(@Param("numeroDeTel") String numeroDeTel);
 }

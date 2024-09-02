@@ -36,8 +36,8 @@ public class Utilisateur implements UserDetails {
     private String email;
 
     private String Password;
-
-    private Long Phonenumber;
+    @Column(name = "phonenumber")
+    private String phonenumber;
 
     private String CodeVerification;
     private Integer loyaltyPoints;
@@ -54,8 +54,12 @@ public class Utilisateur implements UserDetails {
     private List<Abonnement> abonnements = new ArrayList<>();
     @JsonDeserialize(contentUsing = GrantedAuthorityDeserializer.class)
 
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
+        if (Role == null) {
+            return new ArrayList<>();
+        }
         return Role.getAuthorities();
     }
 

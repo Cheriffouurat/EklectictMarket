@@ -4,6 +4,7 @@ package com.example.eklecticproject.Iservice;
 import com.example.eklecticproject.entity.Utilisateur;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface IserviceUser {
      List<Utilisateur> GetALLUser();
@@ -14,4 +15,7 @@ public interface IserviceUser {
      Utilisateur GetUserById(Integer id);
 
     Utilisateur GetUserByUsername(String Username);
+
+
+     Optional<Utilisateur> GetUserByPhoneNumber(String PhoneNumber);
 }

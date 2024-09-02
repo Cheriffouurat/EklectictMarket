@@ -6,6 +6,8 @@ import com.example.eklecticproject.auditing.ApplicationAuditAware;
 import com.example.eklecticproject.entity.Token;
 import com.example.eklecticproject.entity.Utilisateur;
 import com.example.eklecticproject.repository.TokenRepository;
+import com.example.eklecticproject.repository.UserRepository;
+import com.example.eklecticproject.service.AuthenticationService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,6 +22,10 @@ import java.util.List;
 public class UserController {
     IserviceUser iserviceUser;
     TokenRepository tokenRepository;
+    private final AuthenticationService service;
+    private final UserRepository repository;
+
+
 
     @GetMapping("/retrieve-all-user")
     public List<Utilisateur> GetAllUser() {
@@ -48,8 +54,53 @@ public class UserController {
         }
         return ResponseEntity.status(403).build();
     }
+    @PutMapping("/ModifyUser")
+    public ResponseEntity<String> editUser(@RequestBody Utilisateur utilisateur) {
+        Utilisateur existingUserByUsername = repository.GetUserByUsername(utilisateur.getUsername());
+        Utilisateur existingUserByEmail = repository.GetUserByEmail(utilisateur.getEmail());
 
-      @PreAuthorize("hasAuthority('admin:delete')")
+        // Vérifier si le nom d'utilisateur existe déjà pour un autre utilisateur
+        if (existingUserByUsername != null && existingUserByUsername.getId() != utilisateur.getId()) {
+            return ResponseEntity.ok("Nom d'utilisateur existe déjà");
+        }
+
+        // Vérifier si l'email existe déjà pour un autre utilisateur
+        if (existingUserByEmail != null && existingUserByEmail.getId() != utilisateur.getId()) {
+            return ResponseEntity.ok("Email existe déjà");
+        }
+
+        // Suppression des tokens associés
+        List<Token> tokens = tokenRepository.findAllTokenByUser(utilisateur.getId());
+        tokenRepository.deleteAll(tokens);
+
+        // Mise à jour de l'utilisateur
+        iserviceUser.EditUser(utilisateur);
+
+        return ResponseEntity.ok("Modifié avec succès");
+    }
+    @PreAuthorize("hasAuthority('admin:create')")
+    @PostMapping("/registerAdmin")
+    public ResponseEntity <String> regiregisterAdminster(@RequestBody Utilisateur request) {
+        String password = request.getPassword();
+        System.out.println("mot"+password);
+
+        if (password == null || password.isEmpty()) {
+
+            return ResponseEntity.badRequest().body("Le mot de passe est requis."+password);
+        }
+
+
+
+        return ResponseEntity.ok(service.registerAdmin(request)).getBody();
+    }
+
+    @PreAuthorize("hasAuthority('admin:create')")
+    @GetMapping("/admin")
+    public ResponseEntity<String> testAdminAccess() {
+        return ResponseEntity.ok("Accès administrateur autorisé");
+    }
+
+    @PreAuthorize("hasAuthority('admin:delete')")
     @DeleteMapping("/remove-user/{idU}")
     @ResponseBody
     public void removeUser(@PathVariable("idU") Integer idU) {
@@ -59,4 +110,5 @@ public class UserController {
         }
         iserviceUser.DeleteUser(idU);
     }
+
 }

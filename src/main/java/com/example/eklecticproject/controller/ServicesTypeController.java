@@ -82,6 +82,14 @@ public class ServicesTypeController {
         List<ServicesType> servicesTypes = iServiceType.getAllServicesTypeByServiceId(ServiceId);
         return ResponseEntity.ok().body(servicesTypes);
     }
+    @PutMapping(value = "/AjouterModifierImage/{idServiceType}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 
+    public ResponseEntity<?> test(@RequestParam("image") MultipartFile image, @PathVariable("idServiceType") Integer idSt) throws IOException {
+        try{imageSer.AjouterModifierImage(image,idSt);
+            return ResponseEntity.ok(new MessageResponse("image is added successfully!"));
+        }catch ( Exception e){
+            return ResponseEntity.badRequest().body(new MessageResponse("Erreur"));
+        }
+    }
 
 }
